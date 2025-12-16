@@ -1,28 +1,33 @@
-import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "../api/products"; // API funksiyasi
-import ProductCard from "../components/ProductCard";
+import React from 'react'
+import { Link } from 'react-router-dom'
+import ProductCard from '../components/ProductCard'
+import { useProductsQuery, useDeleteProduct } from '../hooks/useProducts'
 
 const Products = () => {
-  // 1️⃣ API dan productlarni olib kelamiz
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,  // axios.get("/products") kabi funksiya
-  });
+  const { data, isLoading, error } = useProductsQuery()
+  const deleteMut = useDeleteProduct()
 
-  // 2️⃣ Loading holati
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <p>Loading...</p>
+  if (error) return <p>Xatolik yuz berdi</p>
 
-  // 3️⃣ Error holati
-  if (error) return <p>Xatolik yuz berdi</p>;
+  const handleDelete = (id) => {
+    if (!confirm('Haqiqatan o‘chirmoqchimisiz?')) return
+    deleteMut.mutate(id)
+  }
 
-  // 4️⃣ Productlarni render qilish
   return (
-    <div className="grid grid-cols-3 gap-4">
-      {data.map(product => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Products</h2>
+        <Link to="add" className="px-3 py-1 bg-blue-500 text-white rounded">Add Product</Link>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {data.map(product => (
+          <ProductCard key={product.id} product={product} onDelete={handleDelete} />
+        ))}
+      </div>
     </div>
-  );
-};
+  )
+}
 
-export default Products;
+export default Products
